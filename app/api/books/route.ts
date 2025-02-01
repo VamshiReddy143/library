@@ -42,13 +42,14 @@ export async function POST(request: Request) {
         await connectDB()
         const formData=await request.formData()
         const title=formData.get('title') as string
+        const content=formData.get('content') as string
         const author=formData.get('author') as string
         const description=formData.get('description') as string
         const coverImage=formData.get('coverImage') as File
         const pdfFile=formData.get('pdfFile') as File
         const available=formData.get('available') === 'true' 
 
-        if(!title || !author || !description || !coverImage || !pdfFile){
+        if(!title || !author || !description || !coverImage || !pdfFile || !content){
             return NextResponse.json({message:"All fields are required"},{status:400})
         }
 
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
             title,
             author,
             description,
+            content,
             coverImage:coverUpload.secure_url,
             pdfUrl:pdfUpload.secure_url,
             available

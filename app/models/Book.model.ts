@@ -7,8 +7,9 @@ export interface IBook extends Document {
   description: string;
   coverImage: string;
   pdfUrl: string;
+  content?: string;
   available: boolean;
-  comments: { userId: string; text: string }[];
+  comments: Schema.Types.ObjectId[];
 }
 
 const bookSchema = new Schema<IBook>(
@@ -16,13 +17,14 @@ const bookSchema = new Schema<IBook>(
     title: { type: String, required: true },
     author: { type: String, required: true },
     description: { type: String, required: true },
+    content: { type: String },
     coverImage: { type: String, required: true },
     pdfUrl: { type: String, required: true },
     available: { type: Boolean, default: true },
     comments: [
       {
-        userId: { type: Schema.Types.ObjectId,ref: 'User'},
-        text: { type: String, required: true },
+        type: Schema.Types.ObjectId,
+        ref: "Comment",
       },
     ],
   },
