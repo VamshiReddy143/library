@@ -1,35 +1,51 @@
 "use client";
-
 import Image from "next/image";
 import { useState } from "react";
 
+// Define types for book data and file states
+interface BookData {
+  title: string;
+  author: string;
+  description: string;
+  content: string;
+  available: boolean;
+}
+
 export default function AdminPage() {
-  const [bookData, setBookData] = useState({
+  const [bookData, setBookData] = useState<BookData>({
     title: "",
     author: "",
     description: "",
     content: "",
     available: true,
   });
-
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
+  // Handle input changes for text fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setBookData({ ...bookData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setBookData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle file input changes
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (e.target.name === "coverImage") setCoverImage(file);
-    if (e.target.name === "pdfFile") setPdfFile(file);
+
+    if (e.target.name === "coverImage") {
+      setCoverImage(file);
+    } else if (e.target.name === "pdfFile") {
+      setPdfFile(file);
+    }
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!coverImage || !pdfFile) {
       setMessage({ text: "Please select both an image and a PDF file", type: "error" });
       return;
@@ -53,7 +69,9 @@ export default function AdminPage() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Failed to upload book");
+      if (!res.ok) {
+        throw new Error("Failed to upload book");
+      }
 
       setMessage({ text: "Book uploaded successfully!", type: "success" });
       setBookData({ title: "", author: "", description: "", content: "", available: true });
@@ -71,6 +89,7 @@ export default function AdminPage() {
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-3xl font-bold text-gray-800 mb-4">📚 Admin - Upload a New Book</h1>
 
+      {/* Display success/error messages */}
       {message && (
         <p
           className={`mt-2 p-3 rounded text-white ${
@@ -81,8 +100,9 @@ export default function AdminPage() {
         </p>
       )}
 
+      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-        {/* Book Title */}
+        {/* Title */}
         <div>
           <label className="block text-gray-700 font-medium">Book Title</label>
           <input
@@ -136,7 +156,7 @@ export default function AdminPage() {
           ></textarea>
         </div>
 
-        {/* Cover Image Upload */}
+        {/* Cover Image */}
         <div>
           <label className="block text-gray-700 font-medium">Cover Image</label>
           <input
@@ -160,7 +180,7 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* PDF File Upload */}
+        {/* PDF File */}
         <div>
           <label className="block text-gray-700 font-medium">Book PDF</label>
           <input

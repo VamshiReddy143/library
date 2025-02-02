@@ -7,6 +7,7 @@ import { MdLibraryAdd } from "react-icons/md";
 import { IoBookSharp } from "react-icons/io5";
 import { FiLogOut } from "react-icons/fi";
 import { useState } from "react";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 interface MenuItem {
   name: string;
@@ -15,51 +16,64 @@ interface MenuItem {
 }
 
 const Sidebar = () => {
-  const pathname = usePathname(); // Get current path
-  const [isCollapsed, setIsCollapsed] = useState(false); // State for collapsed/expanded
+  const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { signOut } = useAuth();
+  const { user } = useUser();
+  const isAdmin = user?.publicMetadata?.role === "admin";
 
   const menuItems: MenuItem[] = [
     { name: "Home", icon: <AiFillHome />, link: "/" },
     { name: "Profile", icon: <FaUserCircle />, link: "/profile" },
-    { name: "Create Book", icon: <MdLibraryAdd />, link: "/admin/createBook" },
+    ...(isAdmin
+      ? [{ name: "Create Book", icon: <MdLibraryAdd />, link: "/admin/createBook" }]
+      : []), // Include "Create Book" only for admins
     { name: "Books", icon: <IoBookSharp />, link: "/admin/Books" },
     { name: "Liked Books", icon: <AiFillHeart />, link: "/likedbooks" },
   ];
 
   const handleLogout = () => {
-    console.log("User logged out"); // Replace with actual logout logic
+    if (signOut) {
+      signOut();
+    } else {
+      console.error("SignOut function is not available.");
+    }
   };
 
   return (
     <div
-      className={`bg-gray-800 text-white flex flex-col p-4 shadow-lg justify-between ${
+      className={`bg-gray-800 text-white flex flex-col justify-between p-4 shadow-lg h-full fixed top-0 left-0 transition-all duration-300 ${
         isCollapsed ? "w-20" : "w-64"
-      } h-screen fixed top-0 left-0 transition-all duration-300`}
+      } hidden md:flex`}
     >
-      {/* Toggle Button */}
+      {/* Brand Section */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="mb-4 p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors"
-        aria-label="Toggle Sidebar"
+        className="relative overflow-hidden bg-transparent border-none cursor-pointer p-0 m-0 uppercase tracking-widest font-bold text-[1.5em] -webkit-text-stroke-[1px] text-[rgba(255,255,255,0.6)]"
       >
-        {isCollapsed ? (
-          <span className="text-xl">→</span>
-        ) : (
-          <span className="text-xl">←</span>
-        )}
+        {/* Actual Text */}
+        <span className="inset-0 flex hover:border-[#37FF8B] hover:text-[#37FF8B] items-center justify-center">
+          &nbsp;{!isCollapsed ? "Universe" : "U"}&nbsp;
+        </span>
+        {/* Hover Text */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 flex items-center justify-center w-0 overflow-hidden border-r-[6px] border-[#37FF8B] text-[#37FF8B] transition-all duration-500 ease-in-out -webkit-text-stroke-[1px]"
+        >
+          &nbsp;Universe&nbsp;
+        </span>
       </button>
 
       {/* Navigation Menu */}
-      <nav className="flex flex-col gap-4 overflow-y-auto">
+      <nav className="flex flex-col gap-4 overflow-y-auto mt-4">
         {menuItems.map((item) => (
           <Link key={item.name} href={item.link}>
             <div
-              className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer
-                ${
-                  pathname === item.link
-                    ? "bg-red-500 text-white"
-                    : "hover:bg-gray-700"
-                }`}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer ${
+                pathname === item.link
+                  ? "bg-red-500 text-white"
+                  : "hover:bg-gray-700"
+              }`}
             >
               <span className="text-xl">{item.icon}</span>
               {!isCollapsed && <span className="text-lg">{item.name}</span>}

@@ -16,15 +16,15 @@ interface Book {
 
 // Reusable Book Card Component
 const BookCard = ({ book }: { book: Book }) => (
-  <Link href={`admin/Books/${book._id}`} key={book._id} aria-label={`View details of ${book.title}`}>
-    <div className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+  <Link href={`/books/${book._id}`} key={book._id} aria-label={`View details of ${book.title}`}>
+    <div className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
       <Image
         src={book.coverImage}
         alt={`Cover image of ${book.title}`}
         width={200}
         height={300}
         loading="lazy"
-        className="object-cover shadow-[20px_20px_15px_rgba(0,0,0,0.3)] w-full rounded-lg mb-2"
+        className="object-cover w-full h-[20em] rounded-lg mb-2"
       />
       <div className="p-4 bg-white dark:bg-gray-900">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white group-hover:text-red-500 transition-colors">
@@ -71,8 +71,7 @@ export default async function ProfilePage() {
 
     // Find or create user in MongoDB
     dbUser = await UserModel.findOne({ clerkId: userId })
-      .populate<{ borrowedBooks: Book[] }>("borrowedBooks")
-      .populate<{ wishlist: Book[] }>("wishlist");
+      .populate<{ wishlist: Book[] }>("wishlist"); // Use TypeScript generics for type safety
 
     if (!dbUser) {
       dbUser = await UserModel.create({
@@ -91,46 +90,12 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-8">
-      {/* Profile Header */}
-      <div className="flex items-start gap-6 mb-8">
-        <Image
-          width={96}
-          height={96}
-          src={clerkUser.imageUrl}
-          alt={`Profile picture of ${clerkUser.firstName}`}
-          className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700 shadow-lg"
-          loading="lazy"
-        />
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            {clerkUser.firstName} {clerkUser.lastName}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">@{dbUser.name}</p>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">{clerkUser.emailAddresses[0]?.emailAddress}</p>
-        </div>
-      </div>
-      
-
-      {/* Borrowed Books Section */}
-      <section className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Borrowed Books</h2>
-        {dbUser.borrowedBooks && dbUser.borrowedBooks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {dbUser.borrowedBooks.map((book :Book) => (
-              <BookCard key={book._id} book={book} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState message="No borrowed books." />
-        )}
-      </section>
-
       {/* Wishlist Section */}
-      <section>
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Wishlist</h2>
+      <section className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Your Wishlist</h2>
         {dbUser.wishlist && dbUser.wishlist.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {dbUser.wishlist.map((book : Book) => (
+            {dbUser.wishlist.map((book) => (
               <BookCard key={book._id} book={book} />
             ))}
           </div>

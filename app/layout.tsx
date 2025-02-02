@@ -5,6 +5,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "./components/Navbar";
 import connectDB from "./lib/mongoose";
 import Sidebar from "./components/Sidebar";
+import MobileNavbar from "./components/MobileNavbar";
+import { FooterPage } from "@/components/Footer/footer";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,23 +28,36 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   connectDB();
   return (
+ 
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" data-theme="light">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
         >
+          {/* Navbar */}
           <Navbar />
-          <div className="flex">
-            {/* Fixed Sidebar */}
+
+          {/* Main Content Container */}
+          <div className="flex min-h-screen">
+            {/* Sidebar (Hidden on Mobile) */}
             <Sidebar />
 
-            {/* Main Content Area */}
-            <main className="flex-1 ml-[16rem] lg:ml-[20rem] transition-all duration-300">
+            {/* Main Content */}
+            <main className="flex-1 transition-all duration-300 ml-[6px] lg:ml-[256px] md:ml-[256px] p-4">
               {children}
             </main>
           </div>
+
+          {/* Footer */}
+          <footer className="bg-gray-800 text-white py-6 px-4 sm:px-8 lg:px-12 mt-auto">
+            <FooterPage />
+          </footer>
+
+          {/* Mobile Navbar (Visible Only on Mobile) */}
+          <MobileNavbar />
         </body>
       </html>
     </ClerkProvider>
+  
   );
 }
