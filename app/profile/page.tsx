@@ -1,6 +1,7 @@
+export const dynamic = "force-dynamic"; // Ensures dynamic server-side rendering
+
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
 import connectDB from "../lib/mongoose";
@@ -16,7 +17,7 @@ interface Book {
 
 // Reusable Book Card Component
 const BookCard = ({ book }: { book: Book }) => (
-  <Link href={`admin/Books/${book._id}`} key={book._id} aria-label={`View details of ${book.title}`}>
+  <Link href={`/admin/Books/${book._id}`} key={book._id} aria-label={`View details of ${book.title}`}>
     <div className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
       <Image
         src={book.coverImage}
@@ -59,30 +60,24 @@ const EmptyState = ({ message }: { message: string }) => (
 
 export default async function ProfilePage() {
   const { userId } = await auth();
-  const clerkUser = await currentUser();
 
-  // Redirect to sign-in if user is not authenticated
-  if (!userId || !clerkUser) redirect("/sign-in");
+  // Redirect if user is not authenticated
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
   let dbUser;
   try {
     // Connect to MongoDB
     await connectDB();
 
-    // Find or create user in MongoDB
+    // Find user in MongoDB
     dbUser = await UserModel.findOne({ clerkId: userId })
       .populate<{ borrowedBooks: Book[] }>("borrowedBooks")
       .populate<{ wishlist: Book[] }>("wishlist");
 
     if (!dbUser) {
-      dbUser = await UserModel.create({
-        clerkId: userId,
-        name:
-          clerkUser.username ||
-          `user_${clerkUser.firstName?.toLowerCase()}${Math.floor(Math.random() * 1000)}`,
-        email: clerkUser.emailAddresses[0]?.emailAddress,
-        profileImage: clerkUser.imageUrl,
-      });
+      return <p className="text-red-500 text-center">User not found in the database.</p>;
     }
   } catch (error) {
     console.error("Database error:", error);
@@ -96,27 +91,26 @@ export default async function ProfilePage() {
         <Image
           width={96}
           height={96}
-          src={clerkUser.imageUrl}
-          alt={`Profile picture of ${clerkUser.firstName}`}
+          src={dbUser.profileImage || "/default-avatar.png"} // Fallback image
+          alt={`Profile picture of ${dbUser.name}`}
           className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700 shadow-lg"
           loading="lazy"
         />
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            {clerkUser.firstName} {clerkUser.lastName}
+            {dbUser.name}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">@{dbUser.name}</p>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">{clerkUser.emailAddresses[0]?.emailAddress}</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">{dbUser.email}</p>
         </div>
       </div>
-      
 
       {/* Borrowed Books Section */}
       <section className="mb-8">
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Borrowed Books</h2>
         {dbUser.borrowedBooks && dbUser.borrowedBooks.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {dbUser.borrowedBooks.map((book :Book) => (
+            {dbUser.borrowedBooks.map((book: Book) => (
               <BookCard key={book._id} book={book} />
             ))}
           </div>
@@ -130,7 +124,7 @@ export default async function ProfilePage() {
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Wishlist</h2>
         {dbUser.wishlist && dbUser.wishlist.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {dbUser.wishlist.map((book : Book) => (
+            {dbUser.wishlist.map((book: Book) => (
               <BookCard key={book._id} book={book} />
             ))}
           </div>

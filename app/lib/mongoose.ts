@@ -1,27 +1,29 @@
-// lib/mongoose.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+
+let isConnected = false; // Track if MongoDB is already connected
 
 const connectDB = async () => {
   try {
-    // Ensure MONGODB_URI is defined
     const MONGODB_URI = process.env.MONGODB_URI;
     if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in .env');
+      throw new Error("MONGODB_URI is not defined in .env");
     }
 
-    // Check if MongoDB is already connected
-    if (mongoose.connection.readyState === 1) {
-      console.log('MongoDB is already connected');
+    if (isConnected) {
+      console.log("Using existing MongoDB connection");
       return;
     }
 
-    // Connect to MongoDB
-    await mongoose.connect(MONGODB_URI);
+    // Connect to MongoDB with proper options
+    await mongoose.connect(MONGODB_URI, {
+      dbName: "library", // Ensure correct DB name
+    });
 
-    console.log('MongoDB connected successfully');
+    isConnected = true; // Mark connection as established
+    console.log("MongoDB connected successfully");
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1); // Exit process with failure
+    console.error("MongoDB connection error:", error);
+    throw new Error("Database connection failed");
   }
 };
 
