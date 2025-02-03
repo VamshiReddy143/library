@@ -68,7 +68,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
-    const { id } =await  params;
+    const { id } = params;
 
     // Fetch the book with populated comments and user details
     const book = await BookModel.findById(id)
@@ -101,7 +101,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
-    const { id } =await  params;
+    const { id } = params;
 
     // Fetch the book details
     const book = await fetchBookById(id);
@@ -148,7 +148,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB();
-    const { id } =await  params;
+    const { id } =params;
 
     // Get user ID from Clerk
     const { userId } = await auth();

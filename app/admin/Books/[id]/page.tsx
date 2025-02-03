@@ -47,7 +47,7 @@ export default function BookDetailPage() {
   const id = params?.id as string;
 
   // Clerk Authentication
-  const { userId, isLoaded, isSignedIn } = useAuth();
+  const { userId, isSignedIn } = useAuth();
 
   useEffect(() => {
     if (!id) return;
