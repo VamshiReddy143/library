@@ -95,7 +95,7 @@ export default async function ProfilePage() {
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Your Wishlist</h2>
         {dbUser.wishlist && dbUser.wishlist.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {dbUser.wishlist.map((book) => (
+            {dbUser.wishlist.map((book: Book) => (
               <BookCard key={book._id} book={book} />
             ))}
           </div>

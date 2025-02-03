@@ -11,7 +11,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 
 interface MenuItem {
   name: string;
-  icon: JSX.Element;
+  icon: string | React.ReactNode;
   link: string;
 }
 
