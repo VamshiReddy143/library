@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import Comment from "@/app/models/Comment";
 import cloudinary from "@/app/components/cloudinary/cloudinary";
 
+
 // Helper functions
 async function fetchBookById(id: string) {
   const book = await BookModel.findById(id).populate("comments");
@@ -23,7 +24,7 @@ async function fetchUserByClerkId(userId: string) {
 
 
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params:{ id: string} }) {
   try {
     await connectDB();
     const { id } = params;
@@ -54,10 +55,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     await BookModel.findByIdAndDelete(id);
 
     return NextResponse.json({ message: "Book deleted successfully" }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error deleting book by ID:", error);
     return NextResponse.json(
-      { message: "Error deleting book", error: error.message },
+      { message: "Error deleting book", error: error instanceof Error ? error.message : "An error occurred" },
       { status: 500 }
     );
   }
@@ -65,7 +66,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
 
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params:{ id: string} }) {
   try {
     await connectDB();
     const { id } = params;
@@ -92,13 +93,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     // Return the book details along with borrowing and liking status
     return NextResponse.json({ book, isBorrowed, isLiked,comments: book.comments }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching book:", error);
-    return NextResponse.json({ message: "Error fetching book", error: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Error fetching book", error : error instanceof Error ? error.message : "An error occurred" }, { status: 500 });
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params:{ id: string} }) {
   try {
     await connectDB();
     const { id } = params;
@@ -139,13 +140,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: "Book updated successfully" }, { status: 200 });
     }
     return NextResponse.json({ message: "Invalid action" }, { status: 400 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error updating book:", error);
-    return NextResponse.json({ message: "Error updating book", error: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Error updating book", error: error instanceof Error ? error.message : "An error occurred" }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: { id: string} }) {
   try {
     await connectDB();
     const { id } =params;
@@ -192,8 +193,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     await book.save();
 
     return NextResponse.json({ message: "Comment added successfully", comment: populatedComment }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error adding comment:", error);
-    return NextResponse.json({ message: "Error adding comment", error: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Error adding comment", error: error instanceof Error ? error.message : "An error occurred" }, { status: 500 });
   }
 }
