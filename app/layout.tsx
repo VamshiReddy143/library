@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import connectDB from "./lib/mongoose";
 import Sidebar from "./components/Sidebar";
 import MobileNavbar from "./components/MobileNavbar";
-import { FooterPage } from "@/components/Footer/footer";
+
 
 
 const geistSans = Geist({
@@ -48,10 +48,7 @@ export default function RootLayout({
             </main>
           </div>
 
-          {/* Footer */}
-          <footer className="bg-gray-800 text-white py-6 px-4 sm:px-8 lg:px-12 mt-auto">
-            <FooterPage />
-          </footer>
+
 
           {/* Mobile Navbar (Visible Only on Mobile) */}
           <MobileNavbar />
